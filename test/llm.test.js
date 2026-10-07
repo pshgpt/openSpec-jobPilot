@@ -41,14 +41,14 @@ test("returns the validated output and sends a JSON-schema request", async () =>
   assert.deepEqual(request.config.responseJsonSchema.properties.kind.enum, ["a", "b"]);
 });
 
-test("model defaults to gemini-3.8-flash and can be overridden with JOBPILOT_MODEL", async () => {
+test("model defaults to gemini-3.1-flash-lite and can be overridden with JOBPILOT_MODEL", async () => {
   const saved = process.env.JOBPILOT_MODEL;
   try {
     delete process.env.JOBPILOT_MODEL;
     let client = stubClient(ok({ answer: "x", kind: "a" }));
     await createGeminiLlm({ client }).parse({ system: "", user: "", schema: Schema });
     assert.equal(client.requests[0].model, DEFAULT_MODEL);
-    assert.equal(DEFAULT_MODEL, "gemini-3.8-flash");
+    assert.equal(DEFAULT_MODEL, "gemini-3.1-flash-lite");
 
     process.env.JOBPILOT_MODEL = "gemini-3.5-flash";
     client = stubClient(ok({ answer: "x", kind: "a" }));

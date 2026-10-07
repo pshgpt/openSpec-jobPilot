@@ -28,8 +28,8 @@ GEMINI_API_KEY=your-key-here
 from the directory you run it in. A `GEMINI_API_KEY` that's already set in
 your environment takes precedence over the file.
 
-The default model is `gemini-3.8-flash`. To use a different one, set
-`JOBPILOT_MODEL` in `.env` (for example `JOBPILOT_MODEL=gemini-3.1-flash-lite`).
+The default model is `gemini-3.1-flash-lite`. To use a different one, set
+`JOBPILOT_MODEL` in `.env` (for example `JOBPILOT_MODEL=gemini-3.8-flash`).
 
 ## Usage
 

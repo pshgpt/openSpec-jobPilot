@@ -1,0 +1,23 @@
+Alex Morgan
+Backend Engineer
+
+EXPERIENCE
+
+Senior Software Engineer, Brightline Analytics (2021 - present)
+- Developed data tools in Python used by 40 analysts across the company.
+- Built reporting pipelines on Postgres, cutting nightly report time from 3 hours to 20 minutes.
+- Designed and maintained REST APIs with FastAPI serving 2 million requests per day.
+- Set up CI/CD with GitHub Actions and Docker for 12 services.
+
+Software Engineer, Northwind Retail (2018 - 2021)
+- Wrote SQL reports and data exports for the finance team.
+- Migrated a monolith's background jobs to AWS Lambda.
+- Mentored two junior engineers through code reviews and pairing.
+
+EDUCATION
+
+B.Sc. in Computer Science, University of Leeds (2018)
+
+SKILLS
+
+Python, SQL, PostgreSQL, FastAPI, Docker, AWS (Lambda, S3), Git

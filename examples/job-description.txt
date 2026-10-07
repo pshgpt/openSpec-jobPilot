@@ -1,0 +1,24 @@
+Backend Engineer - Data Platform
+
+About us
+Fernhill Labs builds analytics software for logistics companies. Our team of 30 engineers works remotely across Europe.
+
+What you'll do
+- Build and run the services behind our data platform.
+- Work with product managers to design new APIs.
+
+What we're looking for
+- 4+ years of professional backend development experience.
+- Strong Python skills.
+- Experience with PostgreSQL or another relational database.
+- Experience designing REST APIs.
+- Familiarity with Docker and CI/CD pipelines.
+- Bachelor's degree in Computer Science or a related field.
+
+Nice to have
+- Experience with Kubernetes.
+- Familiarity with Apache Kafka or other streaming systems.
+- Python is a must, and experience with Go is a plus.
+
+Benefits
+- 30 days of paid holiday and a yearly learning budget.

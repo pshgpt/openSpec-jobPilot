@@ -76,6 +76,7 @@ test("a downgraded match lowers the score to 50", async () => {
   const llm = createFakeLlm(
     { requirements: [req("Python"), req("Leadership")] },
     { classifications: [matched(1, "Developed data tools in Python"), matched(2, "Led a team of 10 engineers")] },
+    { verdict: "A partial fit." },
   );
   const report = await analyze({ llm, resume: RESUME, jobDescription: "jd" });
 
@@ -90,7 +91,7 @@ test("analyze skips classification when nothing was extracted, and the score is 
   const llm = createFakeLlm({ requirements: [] });
   const report = await analyze({ llm, resume: RESUME, jobDescription: "Acme is a great place to work." });
 
-  assert.deepEqual(report, { score: null, requirements: [] });
+  assert.deepEqual(report, { score: null, requirements: [], summary: null });
   assert.equal(llm.calls.length, 1);
 });
 

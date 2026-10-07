@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { Classification, ClassifiedRequirement, Report, Requirement } from "../src/models.js";
+import { Classification, ClassifiedRequirement, MAX_VERDICT_LENGTH, Report, Requirement, Summary } from "../src/models.js";
 
 test("requirement accepts a known importance", () => {
   assert.equal(Requirement.parse({ text: "Python", importance: "must-have" }).importance, "must-have");
@@ -47,7 +47,28 @@ test("classified requirement applies both sets of rules", () => {
 });
 
 test("report allows a null score and rejects out-of-range scores", () => {
-  assert.equal(Report.safeParse({ score: null, requirements: [] }).success, true);
-  assert.equal(Report.safeParse({ score: 101, requirements: [] }).success, false);
-  assert.equal(Report.safeParse({ score: 12.5, requirements: [] }).success, false);
+  assert.equal(Report.safeParse({ score: null, requirements: [], summary: null }).success, true);
+  assert.equal(Report.safeParse({ score: 101, requirements: [], summary: null }).success, false);
+  assert.equal(Report.safeParse({ score: 12.5, requirements: [], summary: null }).success, false);
+});
+
+const SUMMARY = { verdict: "A solid fit.", missingMustHaves: ["Go"], missingNiceToHaves: [] };
+
+test("summary accepts a verdict, a null verdict, and empty lists", () => {
+  assert.equal(Summary.safeParse(SUMMARY).success, true);
+  assert.equal(Summary.safeParse({ ...SUMMARY, verdict: null }).success, true);
+  assert.equal(Summary.safeParse({ ...SUMMARY, missingMustHaves: [] }).success, true);
+});
+
+test("summary rejects a verdict over 600 characters, an empty verdict, or missing lists", () => {
+  assert.equal(Summary.safeParse({ ...SUMMARY, verdict: "x".repeat(MAX_VERDICT_LENGTH) }).success, true);
+  assert.equal(Summary.safeParse({ ...SUMMARY, verdict: "x".repeat(MAX_VERDICT_LENGTH + 1) }).success, false);
+  assert.equal(Summary.safeParse({ ...SUMMARY, verdict: "  " }).success, false);
+  assert.equal(Summary.safeParse({ verdict: null, missingMustHaves: [] }).success, false);
+});
+
+test("report requires a summary field, which may be null", () => {
+  assert.equal(Report.safeParse({ score: null, requirements: [], summary: null }).success, true);
+  assert.equal(Report.safeParse({ score: 100, requirements: [], summary: SUMMARY }).success, true);
+  assert.equal(Report.safeParse({ score: null, requirements: [] }).success, false);
 });

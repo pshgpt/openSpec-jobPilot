@@ -30,8 +30,19 @@ export const Classification = z.object(classificationFields).superRefine(checkEv
 /** A requirement together with its final classification. */
 export const ClassifiedRequirement = Requirement.extend(classificationFields).superRefine(checkEvidence);
 
-/** The result of one analysis run. */
+/** The longest verdict allowed, in characters. */
+export const MAX_VERDICT_LENGTH = 600;
+
+/** A summary of the analysis: an LLM-written verdict plus code-built lists of what's missing. */
+export const Summary = z.object({
+  verdict: z.string().trim().min(1).max(MAX_VERDICT_LENGTH).nullable(),
+  missingMustHaves: z.array(z.string()),
+  missingNiceToHaves: z.array(z.string()),
+});
+
+/** The result of one analysis run. `summary` is null when there are no requirements. */
 export const Report = z.object({
   score: z.number().int().min(0).max(100).nullable(),
   requirements: z.array(ClassifiedRequirement),
+  summary: Summary.nullable(),
 });

@@ -22,6 +22,7 @@ const CLASSIFIED = {
     { index: 3, status: "gap", evidence: null },
   ],
 };
+const VERDICT = { verdict: "A good fit for the backend work; Kubernetes experience is the only gap." };
 
 function capture() {
   let text = "";
@@ -38,7 +39,7 @@ function files(entries) {
   };
 }
 
-async function run(argv, { readFile = files({ "resume.txt": RESUME, "jd.txt": JD }), outputs = [EXTRACTED, CLASSIFIED] } = {}) {
+async function run(argv, { readFile = files({ "resume.txt": RESUME, "jd.txt": JD }), outputs = [EXTRACTED, CLASSIFIED, VERDICT] } = {}) {
   const stdout = capture();
   const stderr = capture();
   const llm = createFakeLlm(...outputs);
@@ -55,7 +56,8 @@ test("valid inputs print a text report and exit 0", async () => {
   const { code, stdout, stderr } = await run(["analyze", "resume.txt", "jd.txt"]);
   assert.equal(code, 0);
   assert.equal(stderr, "");
-  assert.match(stdout, /^Match score: 67% \(2 of 3 requirements matched\)/);
+  assert.match(stdout, /^Match score: 67% \(2 of 3 requirements matched\)\n\nSummary\n {2}A good fit/);
+  assert.match(stdout, /Missing nice-to-haves: Kubernetes/);
   assert.match(stdout, /\[nice-to-have\] Kubernetes/);
 });
 
@@ -65,12 +67,34 @@ test("--json prints one JSON object and nothing else", async () => {
   const json = JSON.parse(stdout);
   assert.equal(json.score, 67);
   assert.equal(json.requirements.length, 3);
+  assert.deepEqual(json.summary, { verdict: VERDICT.verdict, missingMustHaves: [], missingNiceToHaves: ["Kubernetes"] });
 });
 
 test("--json with no requirements", async () => {
   const { stdout, llm } = await run(["analyze", "resume.txt", "jd.txt", "--json"], { outputs: [{ requirements: [] }] });
-  assert.deepEqual(JSON.parse(stdout), { score: null, requirements: [] });
+  assert.deepEqual(JSON.parse(stdout), { score: null, requirements: [], summary: null });
   assert.equal(llm.calls.length, 1);
+});
+
+test("a failed verdict still prints the full report, warns on stderr only, and exits 0", async () => {
+  for (const json of [false, true]) {
+    const argv = ["analyze", "resume.txt", "jd.txt", ...(json ? ["--json"] : [])];
+    const { code, stdout, stderr } = await run(argv, {
+      outputs: [EXTRACTED, CLASSIFIED, new AnalysisError("The Gemini API is unavailable right now (503).")],
+    });
+    assert.equal(code, 0, `json=${json}`);
+    assert.equal(stderr, "Warning: The summary verdict is unavailable: The Gemini API is unavailable right now (503).\n");
+    assert.doesNotMatch(stdout, /Warning/);
+    if (json) {
+      const report = JSON.parse(stdout);
+      assert.equal(report.summary.verdict, null);
+      assert.deepEqual(report.summary.missingNiceToHaves, ["Kubernetes"]);
+      assert.equal(report.requirements.length, 3);
+    } else {
+      assert.match(stdout, /Summary\n {2}Verdict unavailable/);
+      assert.match(stdout, /Gaps \(1\)\n {2}\[nice-to-have\] Kubernetes/);
+    }
+  }
 });
 
 test("--help prints usage", async () => {

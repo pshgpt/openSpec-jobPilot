@@ -5,7 +5,9 @@ spec-driven development using OpenSpec and Claude Code.
 
 Give it a resume and a job description. It lists the job's requirements,
 shows which ones the resume covers (quoting the resume as evidence) and which
-are gaps, and calculates a match score. It uses Google Gemini as the LLM.
+are gaps, calculates a match score, and sums it up: a short verdict on the
+overall fit plus the missing must-have and nice-to-have requirements. It uses
+Google Gemini as the LLM.
 
 ## Setup
 
@@ -43,6 +45,11 @@ between runs and models):
 ```
 Match score: 60% (6 of 10 requirements matched)
 
+Summary
+  Your profile demonstrates a strong foundation in essential backend technologies and aligns well with the core technical requirements for the role. However, your candidacy is impacted by a lack of the required years of professional backend development experience. Further development in areas like Kubernetes and Go would also strengthen your qualifications for this position.
+  Missing must-haves: 4+ years of professional backend development experience
+  Missing nice-to-haves: Experience with Kubernetes, Familiarity with Apache Kafka or other streaming systems, Experience with Go
+
 Matched (6)
   [must-have] Strong Python skills
       Evidence: "Python"
@@ -53,7 +60,7 @@ Matched (6)
   [must-have] Familiarity with Docker
       Evidence: "Docker"
   [must-have] Familiarity with CI/CD pipelines
-      Evidence: "Set up CI/CD with GitHub Actions"
+      Evidence: "CI/CD with GitHub Actions"
   [must-have] Bachelor's degree in Computer Science or a related field
       Evidence: "B.Sc. in Computer Science"
 
@@ -72,7 +79,7 @@ node bin/jobpilot.js analyze examples/resume.txt examples/job-description.txt --
 
 ```json
 {
-  "score": 60,
+  "score": 70,
   "requirements": [
     {
       "text": "Strong Python skills",
@@ -86,17 +93,41 @@ node bin/jobpilot.js analyze examples/resume.txt examples/job-description.txt --
       "status": "gap",
       "evidence": null
     }
-  ]
+  ],
+  "summary": {
+    "verdict": "You are a very strong candidate for this position, as you demonstrate clear proficiency in all of the essential technical requirements. While you lack experience with Kubernetes, Kafka, and Go, these are only supplementary skills and do not detract from your solid foundation in backend development and core toolsets.",
+    "missingMustHaves": [],
+    "missingNiceToHaves": [
+      "Experience with Kubernetes",
+      "Familiarity with Apache Kafka or other streaming systems",
+      "Experience with Go"
+    ]
+  }
 }
 ```
 
-(The JSON above is shortened to two of the ten requirements.)
+(The JSON above is from a separate run and is shortened to two of the ten
+requirements. In that run the "4+ years" requirement was matched, so there are
+no missing must-haves and the score is 70.)
+
+When no requirements are found, there's no summary: the JSON output is
+`{"score": null, "requirements": [], "summary": null}`.
 
 To use the `jobpilot` command directly, run `npm link` once.
 
 If Gemini is overloaded (HTTP 503) or rate-limited (429), JobPilot retries a few
-times with backoff, then exits with an error and prints no report. Try again
+times with backoff. If the requirement extraction or matching still fails, it
+exits with an error and prints no report. If only the summary verdict fails,
+it still prints the full report, shows "Verdict unavailable" in place of the
+verdict, writes a warning to standard error, and exits normally. Try again
 later or pick another model with `JOBPILOT_MODEL`.
+
+### How the summary works
+
+The missing must-haves and nice-to-haves are taken directly from the report by
+code, so they always match the Gaps list. The verdict is written by Gemini from
+the final report only. It never sees the score, so it can't state a different
+one, and a verdict containing a percentage is discarded.
 
 ### How the score works
 

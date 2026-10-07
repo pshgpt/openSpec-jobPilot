@@ -4,6 +4,7 @@ Backend Engineer
 EXPERIENCE
 
 Senior Software Engineer, Brightline Analytics (2021 - present)
+- 8 years of experience
 - Developed data tools in Python used by 40 analysts across the company.
 - Built reporting pipelines on Postgres, cutting nightly report time from 3 hours to 20 minutes.
 - Designed and maintained REST APIs with FastAPI serving 2 million requests per day.

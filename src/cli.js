@@ -70,7 +70,8 @@ export async function main(
 
   let report;
   try {
-    report = await analyze({ llm: createLlm(), resume, jobDescription });
+    const onWarning = (message) => stderr.write(`Warning: ${message}\n`);
+    report = await analyze({ llm: createLlm(), resume, jobDescription, onWarning });
   } catch (error) {
     if (!(error instanceof AnalysisError)) throw error;
     stderr.write(`Error: ${error.message}\n`);
